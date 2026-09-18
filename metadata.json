@@ -1,0 +1,6 @@
+{
+  "name": "SkillBridge AI",
+  "description": "SkillBridge AI analyzes your skills, identifies your gaps, and creates a personalized path to the opportunities you are ready for next.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
