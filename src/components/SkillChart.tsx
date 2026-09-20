@@ -124,7 +124,17 @@ export const SkillChart: React.FC<SkillChartProps> = ({
       </div>
 
       <div className="h-72 w-full">
-        {chartType === 'bar' ? (
+        {barData.length === 0 ? (
+          <div className="h-full w-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-[rgba(75,180,220,0.2)] rounded-2xl bg-[#06152B]/50">
+            <div className="w-10 h-10 rounded-xl bg-[#0D2442] border border-[rgba(75,180,220,0.25)] text-[#657A95] flex items-center justify-center mb-2.5">
+              <Layers className="w-5 h-5 text-[#16E0FF]" />
+            </div>
+            <span className="text-sm font-bold text-[#F4FAFF]">No Skills Analyzed Yet</span>
+            <p className="text-xs text-[#91A4BD] max-w-sm mt-1 leading-relaxed">
+              Upload your resume to benchmark your proficiency against industry hiring standards for {targetCareer || 'your chosen career track'}.
+            </p>
+          </div>
+        ) : chartType === 'bar' ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={barData}

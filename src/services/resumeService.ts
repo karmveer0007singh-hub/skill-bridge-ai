@@ -6,6 +6,7 @@ export interface ResumeUploadResult {
   fileSizeBytes: number;
   fileType: string;
   rawText: string;
+  pdfBase64?: string;
   uploadedAt: string;
 }
 
@@ -165,6 +166,19 @@ export async function extractResumeText(file: File): Promise<string> {
   });
 }
 
+export async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1] || '';
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('Failed to encode file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 /**
  * Uploads, validates and extracts text from a student's resume
  */
@@ -175,6 +189,15 @@ export async function uploadResume(file: File): Promise<ResumeUploadResult> {
   }
 
   const rawText = await extractResumeText(file);
+  let pdfBase64: string | undefined;
+
+  if (file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf')) {
+    try {
+      pdfBase64 = await fileToBase64(file);
+    } catch (e) {
+      console.warn('Could not read PDF base64:', e);
+    }
+  }
 
   return {
     fileName: file.name,
@@ -182,6 +205,7 @@ export async function uploadResume(file: File): Promise<ResumeUploadResult> {
     fileSizeBytes: file.size,
     fileType: file.type || 'application/pdf',
     rawText,
+    pdfBase64,
     uploadedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
 }

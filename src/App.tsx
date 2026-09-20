@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { DemoBanner } from './components/DemoBanner';
 import { AuthModal } from './components/AuthModal';
+import { SupabaseModal } from './components/SupabaseModal';
 
 import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -14,39 +14,49 @@ import { InterviewPage } from './pages/InterviewPage';
 import {
   getCurrentUser,
   subscribeToAuth,
-  enableDemoMode,
   logout,
   setCurrentUser,
 } from './services/authService';
+import { subscribeToSupabaseAuth, fetchProfileFromSupabase } from './services/supabaseClient';
 import { StudentProfile } from './types';
-import { DEMO_STUDENT_PROFILE } from './data/mockData';
 
 export function App() {
   const [user, setUser] = useState<StudentProfile | null>(getCurrentUser());
   const [activeTab, setActiveTab] = useState<string>('landing');
-  const [preselectedCareer, setPreselectedCareer] = useState<string>('Frontend Developer');
+  const [preselectedCareer, setPreselectedCareer] = useState<string>('');
 
   // Auth modal state
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup');
+  const [supabaseModalOpen, setSupabaseModalOpen] = useState(false);
 
   // Keep auth state in sync
   useEffect(() => {
     const unsub = subscribeToAuth((updatedUser) => {
       setUser(updatedUser);
     });
-    return unsub;
+
+    const unsubSupabase = subscribeToSupabaseAuth(async (_event, session) => {
+      if (session?.user && !getCurrentUser()) {
+        const email = session.user.email;
+        if (email) {
+          const profile = await fetchProfileFromSupabase(email);
+          if (profile) {
+            setCurrentUser(profile);
+          }
+        }
+      }
+    });
+
+    return () => {
+      unsub();
+      if (unsubSupabase) unsubSupabase();
+    };
   }, []);
 
   const handleOpenAuth = (mode: 'login' | 'signup' = 'signup') => {
     setAuthModalMode(mode);
     setAuthModalOpen(true);
-  };
-
-  const handleTryDemo = () => {
-    const demo = enableDemoMode();
-    setUser(demo);
-    setActiveTab('dashboard');
   };
 
   const handleLogout = () => {
@@ -57,17 +67,13 @@ export function App() {
 
   const handleSelectCareerFromLanding = (career: string) => {
     setPreselectedCareer(career);
-    if (!user) {
-      enableDemoMode();
-    }
     setActiveTab('upload');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleNavigate = (tab: string) => {
-    // If tab requires auth and user is not logged in, launch demo automatically or open auth modal
     if (['dashboard', 'skill-gaps', 'roadmap', 'interview'].includes(tab) && !user) {
-      enableDemoMode();
-      setActiveTab(tab);
+      handleOpenAuth('login');
       return;
     }
     setActiveTab(tab);
@@ -76,22 +82,6 @@ export function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#020817] text-[#F4FAFF] font-sans selection:bg-[#16E0FF] selection:text-[#020817]">
-      {/* Demo Banner */}
-      <DemoBanner
-        user={user}
-        onUploadCustom={() => {
-          setActiveTab('upload');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onResetDemo={() => {
-          enableDemoMode();
-        }}
-        onExitDemo={() => {
-          logout();
-          setActiveTab('landing');
-        }}
-      />
-
       {/* Main Navbar */}
       <Navbar
         user={user}
@@ -99,7 +89,7 @@ export function App() {
         onNavigate={handleNavigate}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
-        onTryDemo={handleTryDemo}
+        onOpenSupabase={() => setSupabaseModalOpen(true)}
       />
 
       {/* Main Application Router / View Switcher */}
@@ -113,7 +103,6 @@ export function App() {
                 handleOpenAuth('signup');
               }
             }}
-            onTryDemo={handleTryDemo}
             onSelectCareer={handleSelectCareerFromLanding}
           />
         )}
@@ -164,7 +153,7 @@ export function App() {
       </main>
 
       {/* Global Footer */}
-      <Footer onNavigate={handleNavigate} onTryDemo={handleTryDemo} />
+      <Footer onNavigate={handleNavigate} />
 
       {/* Authentication Modal */}
       <AuthModal
@@ -174,6 +163,12 @@ export function App() {
         onSuccess={() => {
           setActiveTab('dashboard');
         }}
+      />
+
+      {/* Supabase Cloud Connection Modal */}
+      <SupabaseModal
+        isOpen={supabaseModalOpen}
+        onClose={() => setSupabaseModalOpen(false)}
       />
     </div>
   );

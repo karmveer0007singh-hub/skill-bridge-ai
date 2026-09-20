@@ -22,11 +22,15 @@ export const SkillGauge: React.FC<SkillGaugeProps> = ({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (safeScore / 100) * circumference;
 
-  let strokeColor = '#16E0FF';
-  let badgeColor = 'bg-[#16E0FF]/15 text-[#35E7FF] border-[#16E0FF]/30';
-  let tier = 'Developing';
+  let strokeColor = '#657A95';
+  let badgeColor = 'bg-slate-500/15 text-slate-400 border-slate-500/30';
+  let tier = 'No Resume (0%)';
 
-  if (safeScore >= 80) {
+  if (safeScore === 0) {
+    strokeColor = '#334155';
+    badgeColor = 'bg-slate-500/15 text-slate-400 border-slate-500/30';
+    tier = 'Not Uploaded (0%)';
+  } else if (safeScore >= 80) {
     strokeColor = '#35E29A';
     badgeColor = 'bg-[#35E29A]/15 text-[#35E29A] border-[#35E29A]/30';
     tier = 'Hiring Ready';

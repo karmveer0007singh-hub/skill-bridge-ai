@@ -29,7 +29,7 @@ export const InterviewPage: React.FC<InterviewPageProps> = ({
   user,
   onNavigateRoadmap,
 }) => {
-  const targetCareer = user?.targetCareer || 'Frontend Developer';
+  const targetCareer = user?.targetCareer || '';
   const currentSkills = user?.analysis?.currentSkills || [];
   const skillGaps = user?.analysis?.skillGaps || [];
 
@@ -156,7 +156,7 @@ export const InterviewPage: React.FC<InterviewPageProps> = ({
             <span>AI Mock Technical Interview Engine</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F4FAFF] font-display">
-            Practice for <span className="text-[#16E0FF]">{targetCareer}</span> Roles
+            Practice for <span className="text-[#16E0FF]">{targetCareer || 'Target Career'}</span> Roles
           </h1>
           <p className="text-xs sm:text-sm text-[#91A4BD] mt-1 max-w-2xl leading-relaxed">
             Answer real-world technical and behavioral questions tailored directly to your verified skills and skill gaps. Receive immediate AI mentor feedback and model responses.

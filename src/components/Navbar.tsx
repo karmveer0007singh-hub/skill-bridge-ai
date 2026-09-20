@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import appLogo from '../assets/images/app_logo.jpg';
 import {
   Sparkles,
   Layers,
@@ -13,6 +14,7 @@ import {
   LayoutDashboard,
   UploadCloud,
   Milestone,
+  Database,
 } from 'lucide-react';
 import { StudentProfile } from '../types';
 
@@ -22,7 +24,7 @@ interface NavbarProps {
   onNavigate: (tab: string) => void;
   onOpenAuth: (mode?: 'login' | 'signup') => void;
   onLogout: () => void;
-  onTryDemo: () => void;
+  onOpenSupabase?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -31,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenAuth,
   onLogout,
-  onTryDemo,
+  onOpenSupabase,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -45,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       // Section spy if on landing page
       if (activeTab === 'landing') {
-        const sections = ['how-it-works', 'skills-value', 'ai-assessment', 'opportunities', 'success-stories'];
+        const sections = ['how-it-works', 'skills-value', 'skill-bridge-path', 'ai-skill-pattern'];
         const scrollPosition = window.scrollY + 120;
 
         for (const sectionId of sections) {
@@ -94,10 +96,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navLinks = [
     { label: 'Home', sectionId: 'home' },
     { label: 'How It Works', sectionId: 'how-it-works' },
-    { label: 'Skills', sectionId: 'skills-value' },
-    { label: 'AI Assessment', sectionId: 'ai-assessment' },
-    { label: 'Opportunities', sectionId: 'opportunities' },
-    { label: 'Success Stories', sectionId: 'success-stories' },
+    { label: 'Skills & Gaps', sectionId: 'skills-value' },
+    { label: 'Learning Paths', sectionId: 'skill-bridge-path' },
   ];
 
   return (
@@ -109,40 +109,21 @@ export const Navbar: React.FC<NavbarProps> = ({
       }`}
     >
       <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Left: Original SkillBridge AI Logo */}
+        {/* Left: AI Ideas & Skills Logo */}
         <div className="flex items-center gap-6">
           <button
             id="brand-logo-btn"
             onClick={() => scrollToSection('home')}
             className="flex items-center gap-3 text-left group focus:outline-hidden"
           >
-            {/* Minimal abstract bridge/network icon */}
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#0A1B33] to-[#0D2442] border border-[rgba(75,180,220,0.4)] flex items-center justify-center text-[#16E0FF] shadow-[0_0_15px_rgba(22,224,255,0.25)] group-hover:shadow-[0_0_22px_rgba(53,231,255,0.45)] group-hover:border-[#35E7FF] transition-all">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-[#35E7FF]"
-              >
-                {/* Two connected nodes + bridge arc + upward movement */}
-                <circle cx="4.5" cy="16.5" r="2.5" fill="#16E0FF" />
-                <circle cx="19.5" cy="16.5" r="2.5" fill="#16E0FF" />
-                <path
-                  d="M4.5 16.5C7.5 9 16.5 9 19.5 16.5"
-                  stroke="#35E7FF"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-                <circle cx="12" cy="8.5" r="2" fill="#35E7FF" />
-                <path
-                  d="M12 8.5V4M12 4L9.5 6.5M12 4L14.5 6.5"
-                  stroke="#16E0FF"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="absolute inset-0 rounded-xl bg-[#16E0FF]/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* AI Ideas & Skills Circular Medallion */}
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.25)] group-hover:shadow-[0_0_22px_rgba(245,158,11,0.5)] group-hover:border-amber-300 transition-all shrink-0 bg-[#06152B]">
+              <img
+                src={appLogo}
+                alt="AI Ideas & Skills Logo"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div>
@@ -266,14 +247,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Actions */}
         <div className="hidden sm:flex items-center gap-3">
-          {/* Try Demo Mode shortcut */}
+          {/* Supabase Cloud Status Indicator */}
           <button
-            id="nav-btn-try-demo"
-            onClick={onTryDemo}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-[#16E0FF] bg-[#16E0FF]/10 hover:bg-[#16E0FF]/20 border border-[rgba(22,224,255,0.3)] transition-all shadow-[0_0_10px_rgba(22,224,255,0.1)]"
+            id="nav-btn-supabase-status"
+            onClick={onOpenSupabase}
+            title="Supabase Database & Cloud Connection"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.12)]"
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Try Demo</span>
+            <Database className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden xl:inline font-semibold text-[11px]">Supabase</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           </button>
 
           {!user ? (
@@ -357,6 +340,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                     >
                       <UploadCloud className="w-3.5 h-3.5 text-[#16E0FF]" />
                       <span>Resume Analysis</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        onOpenSupabase?.();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#91A4BD] hover:text-[#F4FAFF] hover:bg-[#0A1B33] rounded-xl"
+                    >
+                      <Database className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Supabase Sync & DB</span>
                     </button>
                   </div>
                   <div className="pt-1 border-t border-[rgba(75,180,220,0.15)]">
@@ -463,12 +456,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
-                onTryDemo();
+                onOpenSupabase?.();
               }}
-              className="w-full py-2.5 text-center text-xs font-semibold text-[#16E0FF] bg-[#16E0FF]/10 border border-[#16E0FF]/30 rounded-xl"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs font-mono"
             >
-              Launch Demo Mode
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400" />
+                <span>Supabase Database</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Connected</span>
+              </div>
             </button>
+
             {!user ? (
               <button
                 onClick={() => {

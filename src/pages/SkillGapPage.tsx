@@ -34,11 +34,12 @@ export const SkillGapPage: React.FC<SkillGapPageProps> = ({
   const [filterPriority, setFilterPriority] = useState<string>('all');
 
   const analysis = user?.analysis;
+  const hasAnalysis = Boolean(user?.analysis);
   const currentSkills = analysis?.currentSkills || [];
   const skillGaps = analysis?.skillGaps || [];
   const requiredSkills = analysis?.requiredSkills || [];
-  const readinessScore = user?.readinessScore || analysis?.readinessScore || 70;
-  const targetCareer = user?.targetCareer || analysis?.targetCareer || 'Frontend Developer';
+  const readinessScore = hasAnalysis ? (user?.readinessScore ?? analysis?.readinessScore ?? 0) : 0;
+  const targetCareer = user?.targetCareer || analysis?.targetCareer || 'Target Career';
 
   // Priority filtering
   const highGaps = skillGaps.filter((g) => g.priority === 'High');
@@ -111,7 +112,7 @@ export const SkillGapPage: React.FC<SkillGapPageProps> = ({
             score={readinessScore}
             size="md"
             label="Career Readiness Score"
-            sublabel={readinessScore >= 80 ? 'Hiring Ready' : readinessScore >= 65 ? 'Competitive' : 'Needs Practice'}
+            sublabel={readinessScore === 0 ? 'No Resume Uploaded' : readinessScore >= 80 ? 'Hiring Ready' : readinessScore >= 65 ? 'Competitive' : 'Needs Practice'}
           />
         </div>
 

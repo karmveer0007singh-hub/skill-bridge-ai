@@ -34,7 +34,7 @@ export const RoadmapPage: React.FC<RoadmapPageProps> = ({
   const [expandedStepId, setExpandedStepId] = useState<string | null>('step-1');
 
   const roadmap: RoadmapStep[] = user?.roadmap || [];
-  const targetCareer = user?.targetCareer || 'Frontend Developer';
+  const targetCareer = user?.targetCareer || 'Target Career';
 
   // Stats
   const totalSteps = roadmap.length;
@@ -228,7 +228,22 @@ ${step.resources.map((r) => `  - [${r.provider}] ${r.title} (${r.type}) ${r.url 
 
       {/* Roadmap Steps List */}
       <div className="space-y-4">
-        {filteredSteps.map((step) => {
+        {roadmap.length === 0 ? (
+          <div className="text-center py-16 px-6 rounded-3xl glass-card border border-[rgba(75,180,220,0.25)]">
+            <Milestone className="w-12 h-12 text-[#16E0FF] mx-auto mb-4 opacity-80" />
+            <h3 className="text-lg font-bold text-[#F4FAFF]">No Roadmap Generated Yet</h3>
+            <p className="text-xs text-[#91A4BD] max-w-md mx-auto mt-2 leading-relaxed">
+              Upload your resume and select a target career track to generate a customized, milestone-based curriculum targeting your verified skill gaps.
+            </p>
+            <button
+              onClick={onReanalyze}
+              className="mt-6 px-5 py-2.5 bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] text-[#020817] font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(22,224,255,0.35)] transition-all cursor-pointer inline-flex items-center gap-2"
+            >
+              Upload Resume to Build Roadmap
+            </button>
+          </div>
+        ) : (
+          filteredSteps.map((step) => {
           const isExpanded = expandedStepId === step.id;
           const isCompleted = step.status === 'completed';
           const isInProgress = step.status === 'in-progress';
@@ -382,9 +397,10 @@ ${step.resources.map((r) => `  - [${r.provider}] ${r.title} (${r.type}) ${r.url 
               )}
             </div>
           );
-        })}
+        })
+        )}
 
-        {filteredSteps.length === 0 && (
+        {roadmap.length > 0 && filteredSteps.length === 0 && (
           <div className="text-center py-12 glass-card rounded-2xl border border-[rgba(75,180,220,0.25)] p-6 text-[#91A4BD] text-xs font-mono">
             No milestones found matching the filter "{filterStatus}".
           </div>

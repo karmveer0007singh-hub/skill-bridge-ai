@@ -1,9 +1,10 @@
 import { SkillAnalysisResult, RoadmapStep, InterviewQuestion, InterviewEvaluation } from '../types';
-import { DEMO_ANALYSIS_RESULT, DEMO_ROADMAP_STEPS, DEMO_INTERVIEW_QUESTIONS } from '../data/mockData';
+import { DEFAULT_ANALYSIS_RESULT, DEFAULT_ROADMAP_STEPS, DEFAULT_INTERVIEW_QUESTIONS } from '../data/mockData';
 
 export async function analyzeResumeWithAI(
   resumeText: string,
-  targetCareer: string
+  targetCareer: string,
+  resumePdfBase64?: string
 ): Promise<SkillAnalysisResult> {
   try {
     const response = await fetch('/api/ai/analyze-skills', {
@@ -11,7 +12,7 @@ export async function analyzeResumeWithAI(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ resumeText, targetCareer }),
+      body: JSON.stringify({ resumeText, targetCareer, resumePdfBase64 }),
     });
 
     if (!response.ok) {
@@ -22,9 +23,9 @@ export async function analyzeResumeWithAI(
     return data;
   } catch (error) {
     console.warn('AI analysis API call failed, using client fallback:', error);
-    // Return structured demo analysis tailored to career if offline
+    // Return structured analysis tailored to career if offline
     return {
-      ...DEMO_ANALYSIS_RESULT,
+      ...DEFAULT_ANALYSIS_RESULT,
       targetCareer,
       analyzedAt: new Date().toISOString(),
     };
@@ -50,10 +51,10 @@ export async function generateRoadmapWithAI(
     }
 
     const data = await response.json();
-    return data.steps || DEMO_ROADMAP_STEPS;
+    return data.steps || DEFAULT_ROADMAP_STEPS;
   } catch (error) {
     console.warn('AI roadmap generation API call failed, using fallback:', error);
-    return DEMO_ROADMAP_STEPS;
+    return DEFAULT_ROADMAP_STEPS;
   }
 }
 
@@ -76,10 +77,10 @@ export async function getInterviewQuestionsWithAI(
     }
 
     const data = await response.json();
-    return data.questions || DEMO_INTERVIEW_QUESTIONS;
+    return data.questions || DEFAULT_INTERVIEW_QUESTIONS;
   } catch (error) {
     console.warn('AI interview questions API call failed, using fallback:', error);
-    return DEMO_INTERVIEW_QUESTIONS;
+    return DEFAULT_INTERVIEW_QUESTIONS;
   }
 }
 

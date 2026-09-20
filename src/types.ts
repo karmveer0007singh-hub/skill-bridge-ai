@@ -80,6 +80,8 @@ export interface InterviewEvaluation {
   keyPointsCovered: string[];
   suggestedAnswer: string;
   evaluatedAt: string;
+  question?: string;
+  questionType?: string;
 }
 
 export interface StudentProfile {
@@ -100,7 +102,6 @@ export interface StudentProfile {
   analysis?: SkillAnalysisResult;
   roadmap?: RoadmapStep[];
   interviewHistory?: InterviewEvaluation[];
-  isDemo?: boolean;
 }
 
 export interface CareerOption {

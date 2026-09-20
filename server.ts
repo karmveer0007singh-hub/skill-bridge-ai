@@ -33,18 +33,18 @@ function getGeminiClient(): GoogleGenAI | null {
 }
 
 // Helper to call Gemini with retry and fallback
-async function generateJSONWithGemini(prompt: string, schema: any): Promise<any | null> {
+async function generateJSONWithGemini(contents: any, schema: any): Promise<any | null> {
   const ai = getGeminiClient();
   if (!ai) return null;
 
-  const modelsToTry = ['gemini-3.7-flash', 'gemini-2.5-flash'];
+  const modelsToTry = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
 
   for (const model of modelsToTry) {
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const response = await ai.models.generateContent({
           model,
-          contents: prompt,
+          contents,
           config: {
             responseMimeType: 'application/json',
             responseSchema: schema,
@@ -66,10 +66,10 @@ async function generateJSONWithGemini(prompt: string, schema: any): Promise<any 
 
         if (isTemporary && attempt === 1) {
           console.warn(`[Gemini API] Temporary load spike on ${model} (attempt ${attempt}), retrying shortly...`);
-          await new Promise((resolve) => setTimeout(resolve, 800));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           continue;
         } else {
-          console.warn(`[Gemini API] Note: Model ${model} returned: ${err?.message || err}. Falling back to internal engine.`);
+          console.warn(`[Gemini API] Note: Model ${model} returned: ${err?.message || err}. Trying next available engine.`);
           break;
         }
       }
@@ -93,17 +93,17 @@ app.get('/api/health', (req, res) => {
 // 1. Analyze Resume Skills & Gaps Endpoint
 app.post('/api/ai/analyze-skills', async (req, res) => {
   try {
-    const { resumeText, targetCareer } = req.body;
+    const { resumeText, targetCareer, resumePdfBase64 } = req.body;
 
-    if (!resumeText || !targetCareer) {
-      return res.status(400).json({ error: 'resumeText and targetCareer are required' });
+    if ((!resumeText && !resumePdfBase64) || !targetCareer) {
+      return res.status(400).json({ error: 'resumeText or resumePdfBase64 and targetCareer are required' });
     }
 
-    const prompt = `You are SkillBridge AI, a rigorous and supportive career coach and skill-gap analyst for college students.
+    const promptText = `You are SkillBridge AI, a rigorous and supportive career coach and skill-gap analyst for college students.
 Analyze the following student's resume against the target career: "${targetCareer}".
 
 CRITICAL INSTRUCTIONS:
-1. Never invent skills that are not supported by the resume text.
+1. Never invent skills that are not supported by the resume text or uploaded resume.
 2. Clearly distinguish between skills explicitly found in the resume (isExplicit: true) and skills inferred from context or projects (isExplicit: false).
 3. Identify all current skills with realistic proficiency levels (Beginner, Intermediate, Advanced, Expert) and proficiency scores (0-100).
 4. Identify all required industry skills for "${targetCareer}".
@@ -111,14 +111,21 @@ CRITICAL INSTRUCTIONS:
 6. Calculate an accurate, fair overall career readiness score (0-100).
 7. Provide actionable, high-impact recommendations for this student.
 
-STUDENT RESUME TEXT:
-"""
-${resumeText}
-"""
-
+${resumeText ? `STUDENT RESUME TEXT:\n"""\n${resumeText}\n"""\n` : ''}
 TARGET CAREER: "${targetCareer}"
 
 Return a valid JSON object matching the requested schema.`;
+
+    const contents: any[] = [];
+    if (resumePdfBase64) {
+      contents.push({
+        inlineData: {
+          mimeType: 'application/pdf',
+          data: resumePdfBase64,
+        },
+      });
+    }
+    contents.push(promptText);
 
     const schema = {
       type: Type.OBJECT,
@@ -172,7 +179,7 @@ Return a valid JSON object matching the requested schema.`;
       required: ['targetCareer', 'readinessScore', 'summary', 'currentSkills', 'requiredSkills', 'skillGaps', 'recommendations'],
     };
 
-    const parsedData = await generateJSONWithGemini(prompt, schema);
+    const parsedData = await generateJSONWithGemini(contents, schema);
     if (parsedData && parsedData.currentSkills) {
       parsedData.analyzedAt = new Date().toISOString();
       return res.json(parsedData);

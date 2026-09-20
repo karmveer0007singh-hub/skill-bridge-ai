@@ -17,44 +17,29 @@ import {
   Zap,
   BookOpen,
   Code2,
-  Briefcase,
   Users,
   Compass,
-  Star,
   Activity,
-  BarChart3,
   Network,
   Search,
-  Filter,
 } from 'lucide-react';
 
 // Assets
+import appLogo from '../assets/images/app_logo.jpg';
 import heroImage from '../assets/images/hero_ai_student_1789146262476.jpg';
 import networkImage from '../assets/images/ai_skill_network_1789146277554.jpg';
 
 interface LandingPageProps {
   onGetStarted: () => void;
-  onTryDemo: () => void;
   onSelectCareer: (careerTitle: string) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onGetStarted,
-  onTryDemo,
   onSelectCareer,
 }) => {
-  // Assessment interactive state
-  const [activeSkillCategory, setActiveSkillCategory] = useState<'all' | 'technical' | 'soft'>('all');
-  const [interactiveSkillBoost, setInteractiveSkillBoost] = useState<number>(0);
-
   // Skill Bridge target journey state
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
-
-  // Opportunities category filter
-  const [opportunityFilter, setOpportunityFilter] = useState('All');
-
-  // Testimonials active index
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
 
   const careerJourneys = [
     {
@@ -100,107 +85,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   const currentJourney = careerJourneys[selectedRoleIndex];
 
-  // Base readiness 82% plus user interactive boost
-  const dynamicReadiness = Math.min(98, 82 + interactiveSkillBoost);
-
-  const opportunities = [
-    {
-      id: 1,
-      category: 'Internships',
-      title: 'Frontend AI Engineering Intern',
-      company: 'CognitiveScale Labs',
-      location: 'San Francisco, CA (Hybrid)',
-      match: 96,
-      skills: ['React', 'TypeScript', 'Tailwind', 'REST APIs'],
-      stipend: '$45 / hr',
-    },
-    {
-      id: 2,
-      category: 'Jobs',
-      title: 'Junior Fullstack Engineer',
-      company: 'Aether Cloud Systems',
-      location: 'Remote (US/Canada)',
-      match: 91,
-      skills: ['Node.js', 'React', 'PostgreSQL', 'Docker'],
-      stipend: '$92,000 / yr',
-    },
-    {
-      id: 3,
-      category: 'Hackathons',
-      title: 'Global AI Agent Hackathon 2026',
-      company: 'Developer DAO & Google',
-      location: 'Virtual • $50K Prize Pool',
-      match: 94,
-      skills: ['Gemini API', 'React', 'Agentic Workflows'],
-      stipend: 'Hackathon Demo',
-    },
-    {
-      id: 4,
-      category: 'Projects',
-      title: 'Open Source AI Resume Evaluator',
-      company: 'SkillBridge Community',
-      location: 'GitHub Collaboration',
-      match: 88,
-      skills: ['TypeScript', 'PDF Parsing', 'Tailwind CSS'],
-      stipend: 'Portfolio Certified',
-    },
-    {
-      id: 5,
-      category: 'Mentorship',
-      title: '1-on-1 Silicon Valley Staff Mentor',
-      company: 'TechLeaders Alliance',
-      location: 'Bi-Weekly Zoom Sessions',
-      match: 95,
-      skills: ['System Design', 'Interview Prep', 'Career Strategy'],
-      stipend: 'Free for Students',
-    },
-    {
-      id: 6,
-      category: 'Freelance',
-      title: 'Interactive Dashboard Builder',
-      company: 'Novus HealthTech',
-      location: 'Remote Contract (4 Weeks)',
-      match: 89,
-      skills: ['React Components', 'Recharts', 'TypeScript'],
-      stipend: '$3,200 Fixed',
-    },
-  ];
-
-  const filteredOpportunities =
-    opportunityFilter === 'All'
-      ? opportunities
-      : opportunities.filter((op) => op.category === opportunityFilter);
-
-  const testimonials = [
-    {
-      name: 'Aarav Mehta',
-      role: 'Computer Science Sophomore, Berkeley',
-      quote:
-        'SkillBridge helped me understand which skills actually mattered for the role I wanted. Instead of randomly taking courses, I finally had a targeted path.',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-      rating: 5,
-      outcome: 'Secured AI Frontend Internship',
-    },
-    {
-      name: 'Elena Rostova',
-      role: 'Data Science Junior, University of Michigan',
-      quote:
-        'The skill gap matrix revealed that 3 small missing libraries were holding my resume back from automated ATS screenings. Fixed them and landed 4 interviews.',
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80',
-      rating: 5,
-      outcome: 'Placed at Cloud Systems Inc.',
-    },
-    {
-      name: 'Marcus Chen',
-      role: 'Self-Taught & Bootcamp Grad',
-      quote:
-        'The step-by-step roadmap turns overwhelming career transitions into manageable weekly milestones. The AI Mock Interview gave me real confidence.',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80',
-      rating: 5,
-      outcome: 'Full-Stack Engineer at Series B Startup',
-    },
-  ];
-
   return (
     <div className="relative bg-[#020817] text-[#F4FAFF] overflow-hidden selection:bg-[#16E0FF] selection:text-[#020817]">
       {/* Ambient background glows */}
@@ -216,11 +100,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             {/* Left Side (Col 1-7) */}
             <div className="lg:col-span-7 space-y-7 z-10 text-left">
-              {/* Glowing Pill */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#06152B] border border-[rgba(22,224,255,0.35)] shadow-[0_0_15px_rgba(22,224,255,0.2)]">
-                <span className="w-2 h-2 rounded-full bg-[#16E0FF] shadow-[0_0_8px_#16E0FF] animate-ping" />
+              {/* Glowing Pill with Logo */}
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#06152B] border border-amber-400/40 shadow-[0_0_16px_rgba(245,158,11,0.2)]">
+                <img
+                  src={appLogo}
+                  alt="AI Ideas & Skills Logo"
+                  referrerPolicy="no-referrer"
+                  className="w-6 h-6 rounded-full object-cover border border-amber-400/60 shadow-[0_0_8px_rgba(245,158,11,0.4)] shrink-0"
+                />
                 <span className="text-xs font-mono font-bold tracking-wide text-[#35E7FF] uppercase">
-                  AI-Powered Career & Skill Intelligence
+                  SkillBridge AI • Career & Skill Intelligence
                 </span>
               </div>
 
@@ -476,245 +365,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* ======================================================== */}
-      {/* 7. AI SKILL ASSESSMENT DASHBOARD SECTION                 */}
-      {/* ======================================================== */}
-      <section id="ai-assessment" className="relative py-24 border-t border-[rgba(75,180,220,0.15)] tech-grid">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main Glass Panel */}
-          <div className="glass-card-elevated rounded-3xl p-6 sm:p-10 lg:p-12 border border-[rgba(75,180,220,0.3)] shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              {/* Left Side: Score & Core Metrics */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#16E0FF]/10 border border-[#16E0FF]/30 text-[#16E0FF] text-xs font-mono font-semibold">
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>AI SKILL ASSESSMENT</span>
-                </div>
-
-                <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-[#F4FAFF] tracking-tight">
-                  Know exactly where you stand.
-                </h2>
-
-                <p className="text-sm text-[#91A4BD] leading-relaxed">
-                  SkillBridge AI evaluates your verified abilities across codebases, projects, and academic background to produce an actionable, objective readiness index.
-                </p>
-
-                {/* Radial / Circular Score Block */}
-                <div className="flex items-center gap-6 p-4 rounded-2xl bg-[#06152B] border border-[rgba(75,180,220,0.25)]">
-                  {/* Circular SVG Gauge */}
-                  <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
-                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="#0A1B33"
-                        strokeWidth="8"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        fill="transparent"
-                        stroke="url(#cyanGradient)"
-                        strokeWidth="8"
-                        strokeDasharray={251.2}
-                        strokeDashoffset={251.2 - (251.2 * dynamicReadiness) / 100}
-                        strokeLinecap="round"
-                        className="transition-all duration-700"
-                      />
-                      <defs>
-                        <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#16E0FF" />
-                          <stop offset="100%" stopColor="#35E7FF" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-extrabold font-display text-[#35E7FF]">
-                        {dynamicReadiness}%
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="text-xs font-mono font-bold text-[#F4FAFF] uppercase tracking-wider">
-                      Career Readiness
-                    </div>
-                    <div className="text-xs text-[#35E29A] font-medium mt-0.5">
-                      +14% above national average
-                    </div>
-                    <p className="text-[11px] text-[#657A95] mt-1">
-                      Ready for junior & mid entry-level interviews.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Supporting Statistics */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)] text-center">
-                    <div className="text-xl font-bold font-display text-[#16E0FF]">16</div>
-                    <div className="text-[10px] text-[#91A4BD] uppercase font-mono mt-0.5">Detected</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)] text-center">
-                    <div className="text-xl font-bold font-display text-[#35E29A]">5</div>
-                    <div className="text-[10px] text-[#91A4BD] uppercase font-mono mt-0.5">Strengths</div>
-                  </div>
-                  <div className="p-3 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)] text-center">
-                    <div className="text-xl font-bold font-display text-amber-400">4</div>
-                    <div className="text-[10px] text-[#91A4BD] uppercase font-mono mt-0.5">Growth Areas</div>
-                  </div>
-                </div>
-
-                {/* Interactive Simulator Slider */}
-                <div className="p-4 rounded-2xl bg-[#0A1B33]/80 border border-[rgba(75,180,220,0.25)] space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-[#F4FAFF]">Simulate Milestone Completion</span>
-                    <span className="text-[#35E7FF] font-mono font-bold">+{interactiveSkillBoost}% Boost</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="16"
-                    value={interactiveSkillBoost}
-                    onChange={(e) => setInteractiveSkillBoost(Number(e.target.value))}
-                    className="w-full accent-[#16E0FF] bg-[#06152B] cursor-pointer h-1.5 rounded-lg"
-                  />
-                  <div className="flex justify-between text-[10px] text-[#657A95] font-mono">
-                    <span>Baseline (82%)</span>
-                    <span>Fully Ready (98%)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side: Skill Analysis Dashboard */}
-              <div className="lg:col-span-7 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-[rgba(75,180,220,0.2)]">
-                  <span className="text-xs font-mono font-bold text-[#F4FAFF] uppercase tracking-wider">
-                    Competency Breakdown
-                  </span>
-                  <div className="flex gap-1.5">
-                    {(['all', 'technical', 'soft'] as const).map((cat) => (
-                      <button
-                        key={cat}
-                        onClick={() => setActiveSkillCategory(cat)}
-                        className={`px-2.5 py-1 text-[11px] font-mono font-semibold rounded-lg capitalize transition-colors ${
-                          activeSkillCategory === cat
-                            ? 'bg-[#16E0FF] text-[#020817]'
-                            : 'text-[#91A4BD] hover:text-[#F4FAFF] bg-[#0A1B33]'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Skill Bars */}
-                <div className="space-y-4 pt-2">
-                  {/* Problem Solving */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">Problem Solving</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#35E29A]/15 text-[#35E29A] font-bold">
-                          Strong
-                        </span>
-                        <span className="text-xs font-mono font-bold text-[#35E7FF]">92%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#16E0FF] to-[#35E29A] h-full rounded-full w-[92%]" />
-                    </div>
-                  </div>
-
-                  {/* AI Literacy */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">AI & Prompt Engineering</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#35E29A]/15 text-[#35E29A] font-bold">
-                          Strong
-                        </span>
-                        <span className="text-xs font-mono font-bold text-[#35E7FF]">88%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] h-full rounded-full w-[88%]" />
-                    </div>
-                  </div>
-
-                  {/* Communication */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">Communication</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#35E29A]/15 text-[#35E29A] font-bold">
-                          Strong
-                        </span>
-                        <span className="text-xs font-mono font-bold text-[#35E7FF]">84%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#16E0FF] to-[#35E29A] h-full rounded-full w-[84%]" />
-                    </div>
-                  </div>
-
-                  {/* JavaScript */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">JavaScript & TypeScript</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#16E0FF]/15 text-[#35E7FF] font-bold">
-                          Developing
-                        </span>
-                        <span className="text-xs font-mono font-bold text-[#35E7FF]">78%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#16E0FF] to-[#4C8DFF] h-full rounded-full w-[78%]" />
-                    </div>
-                  </div>
-
-                  {/* Data Analysis */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">Data Analysis & SQL</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#16E0FF]/15 text-[#35E7FF] font-bold">
-                          Developing
-                        </span>
-                        <span className="text-xs font-mono font-bold text-[#35E7FF]">71%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-[#16E0FF] to-[#00B8D9] h-full rounded-full w-[71%]" />
-                    </div>
-                  </div>
-
-                  {/* Leadership */}
-                  <div className="p-3.5 rounded-xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#F4FAFF]">Technical Leadership</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-bold">
-                          Priority
-                        </span>
-                        <span className="text-xs font-mono font-bold text-amber-400">64%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-[#0A1B33] h-2 rounded-full overflow-hidden">
-                      <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full w-[64%]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================== */}
       {/* 8. PERSONALIZED SKILL BRIDGE SECTION                     */}
       {/* ======================================================== */}
       <section id="skill-bridge-path" className="relative py-24 border-t border-[rgba(75,180,220,0.15)] bg-[#020817]">
@@ -750,7 +400,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Visual Journey / Map: Horizontal on Desktop, Vertical on Mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
             {/* Step 1: Current Skills */}
             <div className="glass-card rounded-2xl p-6 border-t-2 border-t-[#16E0FF] relative flex flex-col justify-between">
               <div>
@@ -829,32 +479,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <div className="text-[11px] text-[#657A95] font-mono mt-4 pt-3 border-t border-[rgba(75,180,220,0.15)]">
                 Includes portfolio sandbox projects
-              </div>
-            </div>
-
-            {/* Step 4: Career Goal Target */}
-            <div className="glass-card-elevated rounded-2xl p-6 border-t-2 border-t-[#35E29A] relative flex flex-col justify-between bg-gradient-to-b from-[#0A1B33] to-[#06152B]">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] uppercase font-mono font-bold text-[#35E29A]">Target Reached</span>
-                  <div className="w-7 h-7 rounded-lg bg-[#35E29A]/15 text-[#35E29A] flex items-center justify-center">
-                    <Rocket className="w-4 h-4" />
-                  </div>
-                </div>
-                <h3 className="text-base font-bold text-[#35E29A] mb-1 font-display">
-                  {currentJourney.title}
-                </h3>
-                <div className="text-sm font-extrabold text-[#F4FAFF] font-mono mt-2">
-                  {currentJourney.salary}
-                </div>
-                <div className="text-xs text-[#35E7FF] font-medium mt-1">
-                  Demand: {currentJourney.demand}
-                </div>
-              </div>
-
-              <div className="mt-4 p-3 rounded-xl bg-[#020817] border border-[rgba(75,180,220,0.2)] text-[11px] text-[#91A4BD] leading-relaxed">
-                <span className="text-[#16E0FF] font-bold block mb-1">AI Recommendation:</span>
-                {currentJourney.insight}
               </div>
             </div>
           </div>
@@ -1084,90 +708,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       {/* ======================================================== */}
-      {/* 11. CAREER OPPORTUNITIES SECTION                         */}
-      {/* ======================================================== */}
-      <section id="opportunities" className="relative py-24 border-t border-[rgba(75,180,220,0.15)] bg-[#020817]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06152B] border border-[rgba(75,180,220,0.25)] text-[#16E0FF] text-xs font-mono font-semibold mb-3">
-                <Briefcase className="w-3.5 h-3.5" />
-                <span>ECOSYSTEM CONNECTIONS</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-[#F4FAFF] tracking-tight">
-                Turn skills into real opportunities.
-              </h2>
-            </div>
-
-            {/* Filter categories */}
-            <div className="flex flex-wrap gap-1.5">
-              {['All', 'Internships', 'Jobs', 'Hackathons', 'Projects', 'Mentorship'].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setOpportunityFilter(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer ${
-                    opportunityFilter === cat
-                      ? 'bg-[#16E0FF] text-[#020817] font-bold shadow-[0_0_12px_rgba(22,224,255,0.3)]'
-                      : 'bg-[#0A1B33] text-[#91A4BD] hover:text-[#F4FAFF] border border-[rgba(75,180,220,0.2)]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOpportunities.map((op) => (
-              <div
-                key={op.id}
-                className="glass-card rounded-2xl p-6 border border-[rgba(75,180,220,0.25)] hover:border-[#16E0FF] transition-all duration-300 flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#0A1B33] text-[#16E0FF] border border-[rgba(75,180,220,0.2)]">
-                      {op.category}
-                    </span>
-                    <span className="text-xs font-mono font-extrabold text-[#35E7FF] bg-[#16E0FF]/15 px-2.5 py-0.5 rounded-full border border-[#16E0FF]/30">
-                      {op.match}% Match
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-[#F4FAFF] font-display group-hover:text-[#35E7FF] transition-colors">
-                    {op.title}
-                  </h3>
-                  <div className="text-xs text-[#91A4BD] mt-0.5">{op.company}</div>
-                  <div className="text-[11px] text-[#657A95] font-mono mt-0.5 mb-4">{op.location}</div>
-
-                  <div className="flex flex-wrap gap-1.5 mb-6">
-                    {op.skills.map((s) => (
-                      <span
-                        key={s}
-                        className="px-2 py-0.5 rounded-md bg-[#06152B] border border-[rgba(75,180,220,0.15)] text-[11px] text-[#91A4BD]"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-3 border-t border-[rgba(75,180,220,0.15)]">
-                  <span className="text-xs font-mono text-[#35E29A] font-semibold">{op.stipend}</span>
-                  <button
-                    onClick={onGetStarted}
-                    className="p-2 rounded-xl bg-[#0A1B33] hover:bg-[#16E0FF] text-[#16E0FF] hover:text-[#020817] transition-all"
-                    aria-label="View Details"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================== */}
       {/* 12. SUCCESS / IMPACT STATISTICS                          */}
       {/* ======================================================== */}
       <section className="relative py-20 border-t border-[rgba(75,180,220,0.15)] bg-[#06152B]/30">
@@ -1212,67 +752,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <div className="text-[11px] text-[#657A95] mt-1">From 4,200+ student reviews</div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ======================================================== */}
-      {/* 13. TESTIMONIAL / SUCCESS STORY SECTION                  */}
-      {/* ======================================================== */}
-      <section id="success-stories" className="relative py-24 border-t border-[rgba(75,180,220,0.15)] bg-[#020817] tech-grid">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#06152B] border border-[rgba(75,180,220,0.25)] text-[#16E0FF] text-xs font-mono font-semibold">
-              <Star className="w-3.5 h-3.5 fill-[#16E0FF]" />
-              <span>STUDENT OUTCOMES</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display text-[#F4FAFF] tracking-tight">
-              People don't need more information. They need direction.
-            </h2>
-            <p className="text-sm text-[#91A4BD]">
-              Real student stories from campus to tech industry placement.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, idx) => (
-              <div
-                key={t.name}
-                className={`glass-card rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between ${
-                  activeTestimonial === idx
-                    ? 'border-[#16E0FF] shadow-[0_0_25px_rgba(22,224,255,0.2)] -translate-y-1'
-                    : 'border-[rgba(75,180,220,0.2)]'
-                }`}
-                onClick={() => setActiveTestimonial(idx)}
-              >
-                <div>
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-[#F4FAFF] leading-relaxed italic mb-6">
-                    "{t.quote}"
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-[rgba(75,180,220,0.18)] flex items-center gap-3">
-                  <img
-                    src={t.avatar}
-                    alt={t.name}
-                    referrerPolicy="no-referrer"
-                    className="w-10 h-10 rounded-full object-cover border border-[#16E0FF]/40 shrink-0"
-                  />
-                  <div>
-                    <div className="text-sm font-bold text-[#F4FAFF] font-display">{t.name}</div>
-                    <div className="text-[11px] text-[#91A4BD]">{t.role}</div>
-                    <div className="text-[10px] font-mono text-[#35E29A] font-semibold mt-0.5">
-                      ✓ {t.outcome}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -1385,11 +864,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <button
               id="cta-btn-explore-platform"
-              onClick={onTryDemo}
+              onClick={() => {
+                const el = document.getElementById('how-it-works');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0A1B33] hover:bg-[#0D2442] text-[#F4FAFF] border border-[rgba(75,180,220,0.35)] hover:border-[#16E0FF] text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
             >
               <Sparkles className="w-4 h-4 text-[#16E0FF]" />
-              <span>Explore Platform (Demo Mode)</span>
+              <span>See How It Works</span>
             </button>
           </div>
         </div>

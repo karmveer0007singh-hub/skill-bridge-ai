@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   Zap,
 } from 'lucide-react';
-import { uploadResume, getSampleResume, formatFileSize } from '../services/resumeService';
+import { uploadResume, formatFileSize } from '../services/resumeService';
 import { analyzeResumeWithAI, generateRoadmapWithAI } from '../services/aiService';
 import { updateUserAnalysis } from '../services/authService';
 import { POPULAR_CAREERS, SAMPLE_RESUMES } from '../data/mockData';
@@ -35,16 +35,18 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState<string>(user?.resumeRawText || '');
+  const [pdfBase64, setPdfBase64] = useState<string | undefined>(undefined);
   const [fileName, setFileName] = useState<string>(user?.resumeFileName || '');
   const [fileSize, setFileSize] = useState<string>(user?.resumeFileSize || '');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [autoAnalyzeOnUpload, setAutoAnalyzeOnUpload] = useState(true);
 
-  // Career Selection
+  // Career Selection - default to a valid career so button is never blocked
   const [selectedCareer, setSelectedCareer] = useState<string>(
-    preselectedCareer || user?.targetCareer || 'Frontend Developer'
+    preselectedCareer || user?.targetCareer || 'Full Stack Developer'
   );
   const [customCareer, setCustomCareer] = useState('');
   const [isCustomMode, setIsCustomMode] = useState(false);
@@ -54,6 +56,8 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
   const [analysisStep, setAnalysisStep] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const activeTargetCareer = isCustomMode && customCareer.trim() ? customCareer.trim() : selectedCareer;
 
   // Handle Drag & Drop
   const handleDragOver = (e: React.DragEvent) => {
@@ -80,6 +84,54 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
     }
   };
 
+  const runAnalysisCore = async (
+    textToAnalyze: string,
+    pdfBase64ToAnalyze?: string,
+    careerToUse?: string,
+    fName?: string,
+    fSize?: string
+  ) => {
+    const career = careerToUse || activeTargetCareer || 'Full Stack Developer';
+    if (!textToAnalyze && !pdfBase64ToAnalyze) {
+      setErrorMessage('Please upload a resume file or paste your experience before running analysis.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setErrorMessage(null);
+
+    try {
+      setAnalysisStep('Parsing resume structure and credentials...');
+      await new Promise((r) => setTimeout(r, 400));
+
+      setAnalysisStep(`Evaluating verified skills against ${career} benchmarks...`);
+      const analysisResult = await analyzeResumeWithAI(textToAnalyze, career, pdfBase64ToAnalyze);
+
+      setAnalysisStep('Generating step-by-step personalized learning roadmap...');
+      const roadmapSteps = await generateRoadmapWithAI(
+        career,
+        analysisResult.currentSkills,
+        analysisResult.skillGaps
+      );
+
+      setAnalysisStep('Finalizing your career readiness score & gap matrix...');
+      await new Promise((r) => setTimeout(r, 300));
+
+      // Save to user state
+      updateUserAnalysis(analysisResult, roadmapSteps, {
+        fileName: fName || fileName || 'Student_Resume.pdf',
+        fileSize: fSize || fileSize || '120 KB',
+        rawText: textToAnalyze,
+      });
+
+      setIsAnalyzing(false);
+      onAnalysisComplete();
+    } catch (err: any) {
+      setIsAnalyzing(false);
+      setErrorMessage(err.message || 'Analysis encountered an error. Please try again.');
+    }
+  };
+
   const processFile = async (file: File) => {
     setErrorMessage(null);
     setIsUploading(true);
@@ -94,7 +146,7 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
           }
           return prev + 25;
         });
-      }, 150);
+      }, 120);
 
       const result = await uploadResume(file);
       clearInterval(progressInterval);
@@ -104,22 +156,17 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
       setFileName(result.fileName);
       setFileSize(result.fileSize);
       setExtractedText(result.rawText);
+      setPdfBase64(result.pdfBase64);
       setIsUploading(false);
+
+      // If autoAnalyze is enabled, immediately compute career readiness!
+      if (autoAnalyzeOnUpload) {
+        const career = activeTargetCareer || 'Full Stack Developer';
+        await runAnalysisCore(result.rawText, result.pdfBase64, career, result.fileName, result.fileSize);
+      }
     } catch (err: any) {
       setIsUploading(false);
       setErrorMessage(err.message || 'Failed to parse resume file.');
-    }
-  };
-
-  const handleLoadSample = (sampleId: string) => {
-    setErrorMessage(null);
-    const sample = getSampleResume(sampleId);
-    if (sample) {
-      setFileName(sample.title + '.txt');
-      setFileSize('14.2 KB');
-      setExtractedText(sample.text);
-      setSelectedCareer(sample.role);
-      setIsCustomMode(false);
     }
   };
 
@@ -128,60 +175,30 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
     setFileName('');
     setFileSize('');
     setExtractedText('');
+    setPdfBase64(undefined);
     setErrorMessage(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleRunAIAnalysis = async () => {
-    if (!extractedText || extractedText.trim().length < 20) {
-      setErrorMessage('Please upload a resume or select a sample resume before running AI analysis.');
-      return;
-    }
-
-    const career = isCustomMode && customCareer.trim() ? customCareer.trim() : selectedCareer;
-    if (!career) {
-      setErrorMessage('Please select or specify a target career.');
-      return;
-    }
-
-    setIsAnalyzing(true);
+  const handleLoadSampleResume = async (sampleId: string) => {
+    const sample = SAMPLE_RESUMES.find((s) => s.id === sampleId) || SAMPLE_RESUMES[0];
+    setFileName(`${sample.role.replace(/\s+/g, '_')}_Resume.pdf`);
+    setFileSize('145 KB');
+    setExtractedText(sample.text);
+    setPdfBase64(undefined);
+    setSelectedCareer(sample.role);
+    setIsCustomMode(false);
     setErrorMessage(null);
 
-    try {
-      setAnalysisStep('Reading and parsing resume structure...');
-      await new Promise((r) => setTimeout(r, 600));
-
-      setAnalysisStep(`Evaluating skills against ${career} benchmarks...`);
-      const analysisResult = await analyzeResumeWithAI(extractedText, career);
-
-      setAnalysisStep('Generating step-by-step personalized learning roadmap...');
-      const roadmapSteps = await generateRoadmapWithAI(
-        career,
-        analysisResult.currentSkills,
-        analysisResult.skillGaps
-      );
-
-      setAnalysisStep('Finalizing your career readiness matrix...');
-      await new Promise((r) => setTimeout(r, 400));
-
-      // Save to user state
-      updateUserAnalysis(analysisResult, roadmapSteps, {
-        fileName: fileName || 'Student_Resume.pdf',
-        fileSize: fileSize || '120 KB',
-        rawText: extractedText,
-      });
-
-      setIsAnalyzing(false);
-      onAnalysisComplete();
-    } catch (err: any) {
-      setIsAnalyzing(false);
-      setErrorMessage(err.message || 'Analysis encountered an error. Please try again.');
-    }
+    // Run analysis immediately on sample resume
+    await runAnalysisCore(sample.text, undefined, sample.role, `${sample.role.replace(/\s+/g, '_')}_Resume.pdf`, '145 KB');
   };
 
-  const activeTargetCareer = isCustomMode && customCareer.trim() ? customCareer.trim() : selectedCareer;
+  const handleRunAIAnalysis = async () => {
+    await runAnalysisCore(extractedText, pdfBase64, activeTargetCareer, fileName, fileSize);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -195,9 +212,27 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
           Upload Resume & Select Target Career
         </h1>
         <p className="text-sm text-[#91A4BD] mt-1">
-          Provide your resume so our AI can extract your verified skills and calculate your career readiness gap.
+          Provide your resume so our AI can extract your verified skills and calculate your career readiness score.
         </p>
       </div>
+
+      {isAnalyzing && (
+        <div className="mb-6 p-4 rounded-2xl bg-[#06152B] border-2 border-[#16E0FF] shadow-[0_0_30px_rgba(22,224,255,0.25)] flex items-center gap-4 animate-in fade-in">
+          <div className="w-10 h-10 rounded-xl bg-[#0D2442] border border-[#16E0FF] flex items-center justify-center shrink-0">
+            <div className="w-5 h-5 rounded-full border-2 border-[#16E0FF] border-t-transparent animate-spin" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="text-sm font-bold text-[#F4FAFF] font-display flex items-center gap-2">
+                <span>Calculating Career Readiness Score...</span>
+                <span className="text-xs text-[#35E7FF] font-mono font-normal">({activeTargetCareer})</span>
+              </h4>
+              <span className="text-xs font-mono text-[#16E0FF] font-bold animate-pulse">Processing</span>
+            </div>
+            <p className="text-xs text-[#91A4BD] mt-0.5 font-mono">{analysisStep}</p>
+          </div>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="mb-6 p-4 rounded-2xl bg-rose-950/40 border border-rose-500/40 flex items-start gap-3 text-rose-300 text-sm animate-in fade-in">
@@ -240,6 +275,28 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
               onChange={handleFileChange}
               className="hidden"
             />
+
+            {/* Quick Sample Resume Loader */}
+            <div className="mb-4 p-3 rounded-2xl bg-[#06152B] border border-[rgba(75,180,220,0.2)]">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[11px] font-mono text-[#91A4BD] flex items-center gap-1.5 font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-[#16E0FF]" />
+                  Instant Test: Load Sample Student Resume & Calculate Readiness:
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {SAMPLE_RESUMES.map((sample) => (
+                  <button
+                    key={sample.id}
+                    onClick={() => handleLoadSampleResume(sample.id)}
+                    disabled={isAnalyzing}
+                    className="px-2.5 py-1 text-[11px] font-mono bg-[#0A1B33] hover:bg-[#0D2442] text-[#35E7FF] hover:text-[#F4FAFF] border border-[rgba(75,180,220,0.25)] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    ⚡ {sample.role}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {!extractedText ? (
               /* Drag and Drop Zone */
@@ -331,38 +388,49 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
                     Tip: You can edit or paste additional coursework or projects directly into the text box above.
                   </p>
                 </div>
+
+                {/* Immediate Career Readiness Action Card */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-[#16E0FF]/15 to-[#35E7FF]/10 border border-[#16E0FF]/40 space-y-3 shadow-[0_0_20px_rgba(22,224,255,0.15)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#16E0FF] uppercase tracking-wide">
+                        <BrainCircuit className="w-3.5 h-3.5" />
+                        <span>Ready to Calculate Career Readiness</span>
+                      </div>
+                      <p className="text-xs text-[#F4FAFF] mt-0.5">
+                        Target Career:{' '}
+                        <span className="font-bold text-[#35E7FF] font-mono">
+                          {activeTargetCareer}
+                        </span>
+                      </p>
+                    </div>
+
+                    <button
+                      id="btn-calculate-readiness-instant"
+                      onClick={handleRunAIAnalysis}
+                      disabled={isAnalyzing}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] hover:from-[#35E7FF] hover:to-[#00B8D9] text-[#020817] font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(22,224,255,0.4)] cursor-pointer disabled:opacity-50"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-[#020817]" />
+                      <span>Calculate Readiness Now</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-[rgba(75,180,220,0.2)] text-[11px] text-[#91A4BD]">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={autoAnalyzeOnUpload}
+                        onChange={(e) => setAutoAnalyzeOnUpload(e.target.checked)}
+                        className="rounded border-[rgba(75,180,220,0.3)] text-[#16E0FF] focus:ring-0"
+                      />
+                      <span>Automatically calculate readiness whenever a new file is dropped</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
-
-            {/* Quick 1-Click Sample Resumes for Evaluators */}
-            <div className="mt-6 pt-5 border-t border-[rgba(75,180,220,0.2)]">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono font-bold text-[#91A4BD] uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  Or Try a Sample Student Resume (1-Click)
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {SAMPLE_RESUMES.map((sample) => (
-                  <button
-                    key={sample.id}
-                    id={`btn-sample-resume-${sample.id}`}
-                    onClick={() => handleLoadSample(sample.id)}
-                    className="p-3 rounded-2xl border border-[rgba(75,180,220,0.2)] hover:border-[#16E0FF] bg-[#06152B] hover:bg-[#0D2442] text-left transition-all group cursor-pointer"
-                  >
-                    <span className="text-[10px] font-mono font-bold text-[#16E0FF] block mb-0.5">
-                      {sample.role}
-                    </span>
-                    <span className="text-xs font-bold text-[#F4FAFF] block group-hover:text-[#35E7FF] truncate">
-                      {sample.title.split('(')[0]}
-                    </span>
-                    <span className="text-[10px] text-[#91A4BD] line-clamp-2 mt-1 leading-tight">
-                      {sample.description}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -480,15 +548,19 @@ export const ResumeUploadPage: React.FC<ResumeUploadPageProps> = ({
               <button
                 id="btn-run-ai-analysis"
                 onClick={handleRunAIAnalysis}
-                disabled={!extractedText || isAnalyzing}
+                disabled={!extractedText || !activeTargetCareer || isAnalyzing}
                 className={`w-full mt-6 py-3.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(22,224,255,0.35)] transition-all cursor-pointer ${
-                  extractedText
+                  extractedText && activeTargetCareer
                     ? 'bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] hover:from-[#35E7FF] hover:to-[#00B8D9] text-[#020817]'
                     : 'bg-[#06152B] text-[#657A95] border border-[rgba(75,180,220,0.2)] cursor-not-allowed'
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
-                Run AI Skill Analysis
+                {!extractedText
+                  ? 'Upload Resume to Benchmark'
+                  : !activeTargetCareer
+                  ? 'Choose Target Career Above'
+                  : `Calculate Career Readiness (${activeTargetCareer})`}
                 <ArrowRight className="w-4 h-4" />
               </button>
             )}

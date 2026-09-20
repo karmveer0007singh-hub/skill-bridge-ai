@@ -1,4 +1,5 @@
 import React from 'react';
+import appLogo from '../assets/images/app_logo.jpg';
 import {
   Github,
   Linkedin,
@@ -12,10 +13,9 @@ import {
 
 interface FooterProps {
   onNavigate: (tab: string) => void;
-  onTryDemo: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate, onTryDemo }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -44,30 +44,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onTryDemo }) => {
           {/* Brand Left Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0A1B33] to-[#0D2442] border border-[rgba(75,180,220,0.4)] flex items-center justify-center text-[#16E0FF] shadow-[0_0_15px_rgba(22,224,255,0.25)]">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5 text-[#35E7FF]"
-                >
-                  <circle cx="4.5" cy="16.5" r="2.5" fill="#16E0FF" />
-                  <circle cx="19.5" cy="16.5" r="2.5" fill="#16E0FF" />
-                  <path
-                    d="M4.5 16.5C7.5 9 16.5 9 19.5 16.5"
-                    stroke="#35E7FF"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                  />
-                  <circle cx="12" cy="8.5" r="2" fill="#35E7FF" />
-                  <path
-                    d="M12 8.5V4M12 4L9.5 6.5M12 4L14.5 6.5"
-                    stroke="#16E0FF"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.25)] shrink-0 bg-[#06152B]">
+                <img
+                  src={appLogo}
+                  alt="AI Ideas & Skills Logo"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="font-display font-extrabold text-[#F4FAFF] text-xl tracking-tight">
                 SkillBridge <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16E0FF] to-[#35E7FF]">AI</span>
@@ -137,14 +120,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onTryDemo }) => {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <button
-                  onClick={() => scrollToSection('ai-assessment')}
-                  className="hover:text-[#16E0FF] transition-colors text-left"
-                >
-                  Skill Assessment
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => scrollToSection('skill-bridge-path')}
                   className="hover:text-[#16E0FF] transition-colors text-left"
                 >
@@ -153,15 +128,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onTryDemo }) => {
               </li>
               <li>
                 <button
-                  onClick={() => scrollToSection('opportunities')}
-                  className="hover:text-[#16E0FF] transition-colors text-left"
-                >
-                  Opportunities
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => scrollToSection('ai-recommendations')}
+                  onClick={() => scrollToSection('recommendation-preview')}
                   className="hover:text-[#16E0FF] transition-colors text-left"
                 >
                   AI Recommendations
@@ -206,23 +173,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onTryDemo }) => {
                   className="hover:text-[#16E0FF] transition-colors text-left"
                 >
                   Skill Library & Graph
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => scrollToSection('success-stories')}
-                  className="hover:text-[#16E0FF] transition-colors text-left"
-                >
-                  Success Stories
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={onTryDemo}
-                  className="hover:text-[#16E0FF] transition-colors text-left flex items-center gap-1 text-[#16E0FF]"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Launch Demo Simulator</span>
                 </button>
               </li>
             </ul>

@@ -96,16 +96,12 @@ export const POPULAR_CAREERS: CareerOption[] = [
 export const SAMPLE_RESUMES = [
   {
     id: 'cs-junior-web',
-    title: 'Alex Chen (CS Junior - Web Developer)',
+    title: 'Sample CS Junior (Frontend Web Developer)',
     role: 'Frontend Developer',
     description: 'Has solid HTML, CSS, JavaScript, React basics and coursework, looking to break into Frontend Engineering.',
-    text: `Alex Chen
+    text: `Candidate Resume
 San Jose State University - B.S. in Computer Science (Expected May 2026)
-Email: alex.chen@sjsu.edu | GitHub: github.com/alexchen | Portfolio: alexchen.dev
-
-EDUCATION:
-San Jose State University, B.S. in Computer Science (GPA: 3.65)
-Relevant Coursework: Data Structures & Algorithms, Object-Oriented Programming, Web Systems, Database Concepts, Software Engineering Principles.
+Coursework: Data Structures & Algorithms, Object-Oriented Programming, Web Systems, Database Concepts, Software Engineering Principles.
 
 TECHNICAL SKILLS:
 Languages: JavaScript (ES6+), HTML5, CSS3, Java, Python (Basics), C++
@@ -124,7 +120,7 @@ PROJECTS:
 - Used DOM manipulation and event listeners to render quiz questions dynamically from a JSON array.
 
 EXPERIENCE:
-Computer Science Peer Tutor | SJSU Tutoring Center (Sept 2024 - Present)
+Computer Science Peer Tutor | Tutoring Center (Sept 2024 - Present)
 - Mentored over 40 undergraduate students in introductory Java and JavaScript fundamentals.
 - Assisted students in debugging recursion, array manipulation, and DOM rendering issues.`
   },
@@ -178,10 +174,10 @@ PROJECTS & LABS:
   }
 ];
 
-export const DEMO_ANALYSIS_RESULT: SkillAnalysisResult = {
+export const DEFAULT_ANALYSIS_RESULT: SkillAnalysisResult = {
   targetCareer: 'Frontend Developer',
   readinessScore: 72,
-  summary: 'Alex shows strong foundations in core web fundamentals (HTML5, CSS3, modern JavaScript) and practical React components. To reach top-tier Frontend Engineer benchmarks, Alex should master TypeScript, automated testing (Jest/RTL), and modern state management.',
+  summary: 'Candidate shows strong foundations in core web fundamentals (HTML5, CSS3, modern JavaScript) and practical React components. To reach top-tier Frontend Engineer benchmarks, focus on mastering TypeScript, automated testing (Jest/RTL), and modern state management.',
   currentSkills: [
     {
       name: 'HTML5 & Semantic Markup',
@@ -321,7 +317,7 @@ export const DEMO_ANALYSIS_RESULT: SkillAnalysisResult = {
   analyzedAt: new Date().toISOString(),
 };
 
-export const DEMO_ROADMAP_STEPS: RoadmapStep[] = [
+export const DEFAULT_ROADMAP_STEPS: RoadmapStep[] = [
   {
     id: 'step-1',
     stepNumber: 1,
@@ -481,7 +477,7 @@ export const DEMO_ROADMAP_STEPS: RoadmapStep[] = [
     description: 'Synthesize all newly acquired skills into a showcase portfolio project that directly addresses hiring manager criteria.',
     difficulty: 'Advanced',
     estimatedDuration: '3 weeks',
-    practiceTask: 'Write a comprehensive README with architecture diagrams, setup scripts, test instructions, and live deployment demo link.',
+    practiceTask: 'Write a comprehensive README with architecture diagrams, setup scripts, test instructions, and live deployment link.',
     projectIdea: 'SkillBridge or Developer Community Portal with real-time features, automated test suite in GitHub Actions, and 95+ Lighthouse score.',
     resources: [
       {
@@ -503,7 +499,7 @@ export const DEMO_ROADMAP_STEPS: RoadmapStep[] = [
   },
 ];
 
-export const DEMO_INTERVIEW_QUESTIONS: InterviewQuestion[] = [
+export const DEFAULT_INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: 'q-1',
     type: 'Technical',
@@ -517,7 +513,7 @@ export const DEMO_INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     type: 'Technical',
     targetSkill: 'TypeScript',
     question: 'How do TypeScript Generics work, and when would you use a Generic Interface or Type over an `any` or `unknown` type in a reusable React component?',
-    context: 'Targets Alex\'s identified skill gap in TypeScript.',
+    context: 'Targets candidate identified skill gap in TypeScript.',
     sampleAnswerGuidelines: 'Should explain type safety retention, generic syntax `<T>`, and component prop reuse with typed return values.',
   },
   {
@@ -545,42 +541,3 @@ export const DEMO_INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     sampleAnswerGuidelines: 'Use STAR method: Situation, Task, Action (systematic isolation, asking for help, prioritizing essential path), Result.',
   },
 ];
-
-export const DEMO_STUDENT_PROFILE: StudentProfile = {
-  id: 'demo-student-alex',
-  name: 'Alex Chen',
-  email: 'alex.chen@sjsu.edu',
-  college: 'San Jose State University',
-  degree: 'B.S. in Computer Science',
-  graduationYear: '2026',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  targetCareer: 'Frontend Developer',
-  isCustomCareer: false,
-  resumeFileName: 'Alex_Chen_Resume_2025.pdf',
-  resumeFileSize: '142 KB',
-  resumeUploadedAt: '2 hours ago',
-  readinessScore: 72,
-  analysis: DEMO_ANALYSIS_RESULT,
-  roadmap: DEMO_ROADMAP_STEPS,
-  interviewHistory: [
-    {
-      questionId: 'q-1',
-      studentAnswer: 'The real DOM is the browser tree structure. React keeps a lightweight JavaScript copy called the Virtual DOM. When state changes, React creates a new VDOM tree and diffs it with the previous one. It calculates the minimum number of mutations needed and updates the actual DOM in a batch to minimize expensive browser reflows.',
-      score: 88,
-      strengths: [
-        'Accurately explained Virtual DOM as a lightweight JavaScript object representation.',
-        'Clearly articulated the benefit of batching DOM updates to reduce layout reflows.',
-        'Good structured response suitable for a technical screen.',
-      ],
-      areasForImprovement: [
-        'Could have briefly mentioned the importance of unique `key` props in array reconciliation.',
-        'Could mention Fiber architecture for asynchronous scheduling.',
-      ],
-      explanation: 'Very strong answer! You demonstrated solid understanding of React core mechanics. Adding a quick note on keys and React Fiber will make it exceptional.',
-      keyPointsCovered: ['JS object tree', 'Diffing algorithm', 'Batching DOM writes', 'Minimizing reflows'],
-      suggestedAnswer: 'The Virtual DOM is an in-memory representation of real DOM elements. When state changes, React uses its Fiber reconciliation algorithm to compare new and old VDOM trees using O(n) heuristics. It then batches and flushes minimal mutations to the real DOM, avoiding excessive layout and repaint cycles.',
-      evaluatedAt: '1 hour ago',
-    },
-  ],
-  isDemo: true,
-};

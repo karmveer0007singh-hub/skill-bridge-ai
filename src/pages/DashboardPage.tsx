@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LayoutDashboard,
   Sparkles,
@@ -36,8 +36,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const roadmap = user?.roadmap || [];
   const currentSkills = analysis?.currentSkills || [];
   const skillGaps = analysis?.skillGaps || [];
-  const readinessScore = user?.readinessScore || analysis?.readinessScore || 70;
-  const targetCareer = user?.targetCareer || 'Frontend Developer';
+  const hasAnalysis = Boolean(user?.analysis);
+  const readinessScore = hasAnalysis ? (user?.readinessScore ?? analysis?.readinessScore ?? 0) : 0;
+  const targetCareer = user?.targetCareer || '';
   const activities = getRecentActivities();
 
   // Calculate Roadmap Progress
@@ -83,12 +84,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   <GraduationCap className="w-3.5 h-3.5 text-[#16E0FF]" />
                   {user?.college || 'University CS Undergrad'}
                 </span>
-                {user?.isDemo && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-mono font-bold">
-                    <Sparkles className="w-3 h-3" />
-                    Demo Mode Active
-                  </span>
-                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-[#F4FAFF] tracking-tight">
@@ -97,14 +92,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
               <p className="text-xs sm:text-sm text-[#91A4BD] mt-1 flex items-center gap-2">
                 <span>Target Track:</span>
-                <strong className="text-[#16E0FF] font-mono">
-                  {targetCareer}
+                <strong className={`font-mono ${targetCareer ? 'text-[#16E0FF]' : 'text-[#91A4BD] italic'}`}>
+                  {targetCareer || 'Not Selected Yet'}
                 </strong>
                 <button
                   onClick={onSelectCareerChange}
                   className="text-xs text-[#35E7FF] hover:text-[#F4FAFF] underline font-semibold ml-1 cursor-pointer"
                 >
-                  Change Role
+                  {targetCareer ? 'Change Role' : 'Choose Role'}
                 </button>
               </p>
             </div>
@@ -114,11 +109,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               id="dash-btn-continue-roadmap"
-              onClick={() => onNavigate('roadmap')}
+              onClick={() => onNavigate(hasAnalysis ? 'roadmap' : 'upload')}
               className="px-4 py-2.5 bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] hover:from-[#35E7FF] hover:to-[#00B8D9] text-[#020817] font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(22,224,255,0.35)] transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <Milestone className="w-4 h-4" />
-              Continue Roadmap
+              {hasAnalysis ? (
+                <>
+                  <Milestone className="w-4 h-4" />
+                  Continue Roadmap
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="w-4 h-4" />
+                  Upload Resume
+                </>
+              )}
             </button>
             <button
               id="dash-btn-start-interview"
@@ -132,6 +136,31 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </div>
 
+      {/* Notice Banner when No Resume is Uploaded */}
+      {!hasAnalysis && (
+        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-[#0A1B33]/80 border border-[#16E0FF]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.4)]">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#16E0FF]/15 border border-[#16E0FF]/30 text-[#16E0FF] flex items-center justify-center shrink-0 mt-0.5">
+              <UploadCloud className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#F4FAFF]">
+                No Resume Uploaded Yet • Career Readiness: 0%
+              </h4>
+              <p className="text-xs text-[#91A4BD] mt-0.5 leading-relaxed">
+                Upload your resume to calculate your verified skills, benchmark against industry roles, and generate your custom AI learning roadmap.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigate('upload')}
+            className="px-4 py-2 bg-gradient-to-r from-[#16E0FF] to-[#35E7FF] hover:from-[#35E7FF] hover:to-[#00B8D9] text-[#020817] font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(22,224,255,0.3)] transition-all shrink-0 cursor-pointer"
+          >
+            Upload Resume Now
+          </button>
+        </div>
+      )}
+
       {/* Top 4 Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Metric 1: Readiness Gauge */}
@@ -143,9 +172,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <span className="text-3xl font-extrabold text-[#F4FAFF] font-display block mt-1">
               {readinessScore}%
             </span>
-            <span className="text-[11px] text-[#35E29A] font-semibold flex items-center gap-1 mt-1 font-mono">
+            <span className={`text-[11px] font-semibold flex items-center gap-1 mt-1 font-mono ${readinessScore === 0 ? 'text-[#91A4BD]' : 'text-[#35E29A]'}`}>
               <TrendingUp className="w-3 h-3" />
-              {readinessScore >= 80 ? 'Hiring Ready' : 'Competitive Candidate'}
+              {readinessScore === 0
+                ? 'No Resume Uploaded'
+                : readinessScore >= 80
+                ? 'Hiring Ready'
+                : readinessScore >= 65
+                ? 'Competitive Candidate'
+                : 'Developing Skills'}
             </span>
           </div>
           <SkillGauge score={readinessScore} size="sm" />
@@ -240,7 +275,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           />
 
           {/* Next Recommended Milestone Action Card */}
-          {nextStep && (
+          {hasAnalysis && nextStep && (
             <div className="glass-card-elevated rounded-3xl border border-[rgba(75,180,220,0.28)] p-6 shadow-[0_15px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-mono font-bold text-[#16E0FF] uppercase tracking-wider flex items-center gap-1.5">
@@ -276,6 +311,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   Go to full roadmap <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
+            </div>
+          )}
+
+          {!hasAnalysis && (
+            <div className="glass-card-elevated rounded-3xl border border-[rgba(75,180,220,0.28)] p-6 shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+              <span className="text-xs font-mono font-bold text-[#16E0FF] uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                <Milestone className="w-3.5 h-3.5 text-[#35E7FF]" />
+                Personalized Learning Roadmap
+              </span>
+              <h3 className="text-base font-bold text-[#F4FAFF] font-display">
+                No active learning track yet
+              </h3>
+              <p className="text-xs text-[#91A4BD] mt-1 leading-relaxed">
+                Once you upload your resume, our AI will automatically identify your skill gaps and generate a milestone-based curriculum with projects, practice tasks, and curated resources.
+              </p>
+              <button
+                onClick={() => onNavigate('upload')}
+                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D2442] hover:bg-[#123158] text-[#16E0FF] font-bold text-xs rounded-xl border border-[rgba(75,180,220,0.3)] transition-all cursor-pointer"
+              >
+                Upload Resume to Get Started
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           )}
         </div>
